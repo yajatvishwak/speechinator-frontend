@@ -12,7 +12,9 @@
   }
 </script>
 
-<section class="max-w-screen-lg bg-white p-10   mx-auto min-h-screen h-full ">
+<section
+  class="max-w-screen-lg bg-white dark:bg-gray-800 p-10   mx-auto min-h-screen h-full "
+>
   <div class=" text-xl font-bold">Speechinator - 3000</div>
   <div class="">present like there is no tomorrow</div>
   {#if step === 0}

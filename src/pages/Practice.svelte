@@ -2,12 +2,66 @@
   export let script;
   export let step;
   export let sentences;
+  let mediaRecorder = null;
+  let amediaRecorder = null;
+  let media = [];
+  let amedia = [];
+  let videoSource = null;
+  let loading = false;
   let isRecording = false;
+  const obtenerVideoCamara = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      // const astream = await navigator.mediaDevices.getUserMedia({
+      //   audio: true,
+      // });
+      videoSource.srcObject = stream;
+      videoSource.play();
+      mediaRecorder = new MediaRecorder(stream);
+      // amediaRecorder = new MediaRecorder(astream, { mimeType: "audio/webm" });
+      mediaRecorder.ondataavailable = (e) => media.push(e.data);
+      // amediaRecorder.ondataavailable = (e) => amedia.push(e.data);
+      mediaRecorder.onstop = function () {
+        // recAudio.src = window.URL.createObjectURL(blob);
+        // console.log(window.URL.createObjectURL(blob));
+        let video_local = URL.createObjectURL(
+          new Blob(media, { type: "video/webm" })
+        );
+        window.open(video_local);
+        console.log(video_local);
+        stream.getTracks().forEach(function (track) {
+          track.stop();
+        });
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  async function stopRecording() {
+    console.log(media);
+    mediaRecorder.stop();
+    // amediaRecorder.stop();
+  }
 </script>
 
-<div class="grid grid-cols-3 gap-5 mt-10 text-lg">
-  <div class="max-h-[80vh] col-span-2 overflow-auto pr-6">
+<div class="grid grid-cols-1 md:grid-cols-3  gap-5 mt-10 text-lg">
+  <div class="max-h-[80vh] row-start-1 col-span-2 overflow-auto pr-6">
     {script}
+  </div>
+  <div class="flex flex-col gap-3">
+    <div class="flex p-2 rounded-2xl bg-yellow-600 w-full">
+      <!-- svelte-ignore a11y-media-has-caption -->
+      <video
+        bind:this={videoSource}
+        class="rounded-lg  "
+        playsinline
+        autoplay
+        muted
+      />
+    </div>
   </div>
   <div class="flex flex-col gap-3">
     <div class="flex p-2 rounded-2xl bg-yellow-100 w-full">Video</div>
@@ -17,6 +71,7 @@
         <div class="flex  gap-2 items-center justify-between w-full">
           <div class=" animate-pulse">🔴</div>
           <div class="text-red animate-pulse">Recording...</div>
+
           <div class="btn rounded-full btn-outline btn-xs ml-auto">
             Stop Recording
           </div>
@@ -24,8 +79,13 @@
       {:else}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div
-          on:click={() => (isRecording = true)}
-          class="btn rounded-full btn-xs"
+          on:click={async () => {
+            await obtenerVideoCamara();
+            mediaRecorder.start(4000);
+            // amediaRecorder.start(4000);
+            isRecording = true;
+          }}
+          class="btn rounded-full btn-outline btn-xs ml-auto"
         >
           Record
         </div>
